@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Orchestrator"
+  short_description: "Delegate engineering, validation, and domain review"
+  default_prompt: "Use $codex-orchestrator to coordinate workers, validators, and domain reviewers for my assigned tickets."
