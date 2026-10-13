@@ -9,6 +9,7 @@ skills/
 ├── development/   # debugging, proof-of-concept, software-engineering
 ├── planning/      # describe, to-design, to-intent, to-ticket, to-todo
 ├── reviewing/     # review, validator, retro
+├── productivity/  # second-brain
 └── workflow/      # codex-orchestrator, pi-orchestrator, sdlc-guide
 ```
 
@@ -43,6 +44,10 @@ Pi and Codex discover skill files recursively, so skills may be grouped in these
 - `codex-orchestrator` — supervised coordination of Codex sub-agents
 
 The general workflow skills are intended for use with either agent; the orchestrator skills are agent-specific.
+
+### Productivity — `skills/productivity/`
+
+- `second-brain` — shared Obsidian memory: recall related knowledge, capture meaningful milestones, and handle explicit “remember this” requests
 
 ## SDLC workflow
 
@@ -113,6 +118,24 @@ Without a source, `/skill:retro` reviews the current session. Run reviews save
 `retro.md` beside the manifest; findings require approval before changing agents,
 skills, or code. See [run records](skills/workflow/pi-orchestrator/references/retrospective.md)
 and the [retro skill](skills/reviewing/retro/SKILL.md).
+
+## Second-brain memory
+
+The [second-brain skill](skills/productivity/second-brain/SKILL.md) uses the existing
+`peem-obsidian` vault and official Obsidian CLI. Projects go to `1_Projects/`,
+research to `2_Areas/`, and reusable resources to `3_Resources/`. It searches before
+writing, preserves human content, deduplicates captures, verifies writes, and uses
+the existing agent logs. Routine creation and append-only updates do not require
+approval under the updated vault policy; destructive or structural changes still do.
+
+In Pi, use `/skill:second-brain remember <knowledge>` or
+`/skill:second-brain recall <topic>`. In Codex, request `second-brain` by name.
+For automatic milestone routing, add the shared
+[instruction block](skills/productivity/second-brain/references/agent-instructions.md)
+to `~/.pi/agent/APPEND_SYSTEM.md` and `~/.codex/AGENTS.md`. Trusted Pi project
+`APPEND_SYSTEM.md` files replace the global append file, so include the block there
+as well when needed. Reload Pi or start a new Codex session after instruction changes.
+These are agent instructions, not a background watcher or guaranteed session-exit hook.
 
 ## Install
 
