@@ -18,6 +18,14 @@ To avoid PATH issues in tmux, always resolve the absolute path of the `pi` binar
 PI_BIN=$(which pi)
 ```
 
+## Automatic Run Records
+
+For every approved orchestration run, follow [Run Records and Retrospectives](references/retrospective.md). Before dispatch, create a private `.pi/msp/<run-id>/` directory and `manifest.json` linking the parent session, grounding artifacts, code identity, and agent/skill versions. Register each worker before launch, then update its actual transcript path and outcome as evidence becomes available. Use unique worker IDs for replacement sessions and repair rounds; never overwrite an earlier worker's record.
+
+Keep Pi session persistence enabled for every worker: **do not use `--no-session`**. Pi JSONL transcripts are the primary conversation record; tmux terminal logs supplement them with startup/crash evidence. Attach `pipe-pane` before starting Pi. Verify both records exist after the first completed turn and before teardown; record missing evidence explicitly rather than claiming complete capture. Do not close a live ephemeral parent/worker before offering an export of its available history.
+
+These records are collected by the orchestrator during future runs, not by a global hook for arbitrary tmux panes. Existing ordinary parent Pi sessions already persist automatically unless launched with `--no-session`.
+
 ## Execution Workflow
 
 ### Primary: Sequential Pipeline Mode (Default)
@@ -175,27 +183,52 @@ Current State: [Result/Artifact Path]"
 
 ## Tmux Implementation
 
-Run the sub-agent **interactively and directly in the pane**. Do **not** use `--print` (non-interactive: the process exits after one turn, making supervision impossible) and do **not** pipe output through `tee` (pi's TUI requires the real tmux TTY; a pipe kills it). Use `tmux pipe-pane` for observe-only logging instead.
+Run the sub-agent **interactively and directly in the pane**. Do **not** use `--print` (non-interactive: the process exits after one turn, making supervision impossible) and do **not** pipe output through `tee` (pi's TUI requires the real tmux TTY; a pipe kills it). Use `tmux pipe-pane` for observe-only logging instead. Start a login shell first, attach logging to its exact pane ID, then launch Pi so startup output is not lost.
+
+The examples below run in Bash. Set `PROJECT_DIR` to the absolute project path, `RUN_ID` to a unique run identifier, `WORKER_ID` to a unique role/round/attempt identifier, and `PROMPT` to the approved handoff. Use letters, numbers, underscores, or hyphens for these IDs and start/end with a letter or number (also safe for tmux session names). Prepare the manifest as described above before running these commands. Stop on any failed command; do not launch Pi after failed log setup.
+
+### Shared Setup
+```bash
+set -e
+umask 077
+PI_BIN=$(command -v pi)
+RUN_DIR="$PROJECT_DIR/.pi/msp/$RUN_ID"
+SESSION_NAME="pi-$RUN_ID-$WORKER_ID"
+WORKER_SESSION_ID="$RUN_ID-$WORKER_ID"
+LOG_FILE="$RUN_DIR/logs/$WORKER_ID.terminal.log"
+mkdir -p "$RUN_DIR/logs" "$RUN_DIR/reports"
+# Quote arguments instead of interpolating the prompt into executable shell syntax.
+printf -v PI_COMMAND '%q ' "$PI_BIN" --name "$SESSION_NAME" --session-id "$WORKER_SESSION_ID" -- "$PROMPT"
+printf -v LOG_COMMAND 'umask 077; exec cat >> %q' "$LOG_FILE"
+```
 
 ### New Dedicated Session (Recommended)
 ```bash
-tmux new-session -d -s "$SESSION_NAME" "$PI_BIN --name task-1 --no-session \"$PROMPT\""
-tmux pipe-pane -o -t "$SESSION_NAME" "cat >> $LOG_FILE"   # observe-only log; does not touch the pane's stdio
+PANE_ID=$(tmux new-session -d -P -F '#{pane_id}' -s "$SESSION_NAME" -c "$PROJECT_DIR" /bin/zsh -l)
+tmux pipe-pane -O -t "$PANE_ID" "$LOG_COMMAND"
+# Save PANE_ID, SESSION_NAME, WORKER_SESSION_ID, and LOG_FILE in the worker record.
+tmux send-keys -l -t "$PANE_ID" "$PI_COMMAND"
+tmux send-keys -t "$PANE_ID" Enter
 ```
 
 ### New Window in Current Session
 ```bash
 CURRENT_SESSION=$(tmux display-message -p '#S')
-tmux new-window -t "$CURRENT_SESSION" -n "task-1"
-tmux send-keys -t "$CURRENT_SESSION:task-1" "$PI_BIN --name task-1 --no-session \"$PROMPT\"" Enter
-tmux pipe-pane -o -t "$CURRENT_SESSION:task-1" "cat >> $LOG_FILE"
+PANE_ID=$(tmux new-window -d -P -F '#{pane_id}' -t "$CURRENT_SESSION" -n "$WORKER_ID" -c "$PROJECT_DIR" /bin/zsh -l)
+tmux pipe-pane -O -t "$PANE_ID" "$LOG_COMMAND"
+# Save PANE_ID, CURRENT_SESSION, WORKER_SESSION_ID, and LOG_FILE in the worker record.
+tmux send-keys -l -t "$PANE_ID" "$PI_COMMAND"
+tmux send-keys -t "$PANE_ID" Enter
 ```
+
+Only use these launch commands for newly created, owned panes. Capture the actual Pi transcript path after the first completed turn and update the manifest; a requested session ID alone is not proof of a saved transcript.
 
 ## Verification & Monitoring
 
 - **Attach**: `tmux attach -t <session-name>`
 - **Watch live**: `tmux capture-pane -t <session-name> -p | tail -n 15`
-- **Watch historical**: `tail -f .pi/msp/logs/*.log` (written by `tmux pipe-pane`)
+- **Watch terminal logs**: `tail -f .pi/msp/<run-id>/logs/*.terminal.log` (written by `tmux pipe-pane`; includes terminal control sequences, not a structured transcript).
+- **Review full history**: Read the parent and worker Pi JSONL files linked in `.pi/msp/<run-id>/manifest.json`, following entry IDs/parent IDs across branches. A sentinel or terminal log cannot replace this evidence.
 - **Sentinel**: Check for `.pi/msp/task-n.done` to trigger the next sequential step.
 - **Tearing down a failed sub-session**: only after corrections via `send-keys` are exhausted; kill with `tmux kill-session -t <session-name>` and re-dispatch with a handoff stating what did and did not happen — never silently retry until the sub-agent stops asking for approval.
 
@@ -204,7 +237,7 @@ tmux pipe-pane -o -t "$CURRENT_SESSION:task-1" "cat >> $LOG_FILE"
 At the end of dispatch/pipeline setup, print:
 - Tmux session name and attach command.
 - Sequence of agents (Parallel vs Sequential).
-- Path to logs and expected sentinel files.
+- Run manifest path, parent/worker Pi transcript paths, terminal log paths, and expected sentinel files; explicitly list missing or unverified records.
 - Grounding artifacts loaded (intent.md, design suite, tickets, todo.md) with their paths; flag any that were missing.
 - Summary of the context being passed between agents.
 - For implementation–validation loops: criterion/role ownership, frozen target, approved local resources, repair budget and current round, validator/consolidated report paths, unresolved finding IDs, and final PASS/FAIL/INCOMPLETE verdict when finished.
@@ -216,6 +249,7 @@ At the end of dispatch/pipeline setup, print:
 - **Environment Integrity**: Always use absolute paths and login shells (`zsh -l`).
 - **Truthful Handoffs**: Do not hallucinate decisions or results; synthesize only what is supported by the sub-agent's logs, saved reports, and referenced artifacts. Distinguish reported claims from verified tool evidence.
 - **User Approval**: Present the full sequential chain to the user before starting the first agent, including validator roles, any proposed parallelism, and the repair budget.
+- **Private Records**: Keep run records local and private, exclude `.pi/msp/` from Git, and never automatically upload logs or edit agent/skill instructions from retrospective findings. Stop logging only on owned panes and preserve the files after cleanup.
 - **Validation Isolation**: No implementation edits while validators are checking a frozen target; isolate mutable test resources or serialize checks.
 - **Local-Only Validation**: Enforce the validator safety gate for every worker; only the user's explicit safe testing procedure can permit remote validation.
 - **Bounded Feedback**: Consolidate evidence before dispatching fixes; never reset the repair budget on new findings or worker replacement, or treat missing validation as success.

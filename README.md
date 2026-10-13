@@ -8,7 +8,7 @@ Personal coding-agent skills for @peempumrapee's work, supporting both [Pi](http
 skills/
 ├── development/   # debugging, proof-of-concept, software-engineering
 ├── planning/      # describe, to-design, to-intent, to-ticket, to-todo
-├── reviewing/     # review, validator
+├── reviewing/     # review, validator, retro
 └── workflow/      # codex-orchestrator, pi-orchestrator, sdlc-guide
 ```
 
@@ -34,6 +34,7 @@ Pi and Codex discover skill files recursively, so skills may be grouped in these
 
 - `validator` — acceptance validation against intent, design, and observed behavior
 - `review` — evidence-based, read-only code and design reviews
+- `retro` — explicitly invoked retrospectives of Pi sessions and tmux runs; proposes agent, skill, and workflow improvements
 
 ### Workflow — `skills/workflow/`
 
@@ -92,6 +93,26 @@ Unlike read-only `review`, `validator` executes behavioral checks. Explicitly in
 
 See the [SDLC guide](skills/workflow/sdlc-guide/SKILL.md) and
 [full state machine](skills/workflow/sdlc-guide/references/state-machine.md) for details.
+
+## Pi run records and retrospectives
+
+Future `pi-orchestrator` runs keep worker Pi transcripts persistent and attach tmux
+terminal logging before Pi starts. The orchestrator maintains
+`.pi/msp/<run-id>/manifest.json`, linking the parent and workers to their transcripts,
+logs, reports, and instruction versions. These records stay local and should be
+excluded from Git. This does not install a global hook for unrelated tmux panes.
+
+In a fresh Pi session, review a run or an individual saved session:
+
+```text
+/skill:retro /absolute/project/.pi/msp/<run-id>/manifest.json
+/skill:retro /absolute/path/to/session.jsonl
+```
+
+Without a source, `/skill:retro` reviews the current session. Run reviews save
+`retro.md` beside the manifest; findings require approval before changing agents,
+skills, or code. See [run records](skills/workflow/pi-orchestrator/references/retrospective.md)
+and the [retro skill](skills/reviewing/retro/SKILL.md).
 
 ## Install
 
