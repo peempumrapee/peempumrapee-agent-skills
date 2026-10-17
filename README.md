@@ -35,7 +35,7 @@ Pi and Codex discover skill files recursively, so skills may be grouped in these
 
 - `validator` — acceptance validation against intent, design, and observed behavior
 - `review` — evidence-based, read-only code and design reviews
-- `retro` — explicitly invoked retrospectives of Pi sessions and tmux runs; proposes agent, skill, and workflow improvements
+- `retro` — explicitly invoked retrospectives of Pi sessions, tmux runs, or project-scoped session history; proposes agent, skill, and workflow improvements
 
 ### Workflow — `skills/workflow/`
 
@@ -112,9 +112,13 @@ In a fresh Pi session, review a run or an individual saved session:
 ```text
 /skill:retro /absolute/project/.pi/msp/<run-id>/manifest.json
 /skill:retro /absolute/path/to/session.jsonl
+/skill:retro --project /absolute/project/path [--since YYYY-MM-DD] [--limit N]
 ```
 
-Without a source, `/skill:retro` reviews the current session. Run reviews save
+Project mode selects sessions by their recorded working directory and linked run manifests,
+with a default cap of 20 sessions; use `--limit all` to remove the cap. It reports the
+sessions reviewed and any coverage gaps. Without a source, `/skill:retro` reviews the
+current session. Run reviews save
 `retro.md` beside the manifest; findings require approval before changing agents,
 skills, or code. See [run records](skills/workflow/pi-orchestrator/references/retrospective.md)
 and the [retro skill](skills/reviewing/retro/SKILL.md).
