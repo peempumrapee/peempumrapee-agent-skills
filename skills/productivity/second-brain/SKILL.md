@@ -21,7 +21,7 @@ Use the vault as durable, human-readable memory, not a transcript archive. Read 
 
 ### Recall
 
-Before substantial work on a project or topic, search for its name, repository name, and useful synonyms. Read the best matching project/topic notes and relevant recent entries in `agent/Agent Log.md`; do not dump the entire vault into context. For long logs, extract only the relevant tail from CLI output.
+Before substantial work on a project or topic, reuse relevant notes already read in this session; do not repeat recall unless a material gap or freshness concern appears. Otherwise start with a known exact project/topic note, or one narrow name/repository search and its best match. Read relevant recent entries in `agent/Agent Log.md` when needed for missing decision or progress context; extract only the relevant tail for long logs. Stop when the needed context is available. Widen to synonyms or additional notes only for an explicit unanswered question; do not dump the entire vault into context.
 
 Use prior decisions, constraints, unresolved questions, and next steps as context. Cite the notes used. Dates and evidence matter: memory may be stale, and current user instructions and verified project behavior take precedence. Explain material conflicts instead of silently carrying an old decision forward.
 

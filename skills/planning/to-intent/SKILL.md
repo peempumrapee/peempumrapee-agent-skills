@@ -55,4 +55,4 @@ The output file must follow this structure:
 ## Next Steps (The Hand-off)
 Once `intent.md` is finalized, the To Intent skill must guide the user to the next phase:
 1. Suggest running `pi describe` to map the intent against the current codebase.
-2. Suggest running `pi to-design` to create the `DESIGN.md` based on the `intent.md`.
+2. Suggest using `to-design` to create `docs/designs/[YYYYMMDD-HHMM]_[feature-name]/overview.md` and only the supporting files needed. Goal and Why remain in intent; the design links here rather than repeating them. Honor the project's existing design convention.

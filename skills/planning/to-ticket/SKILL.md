@@ -17,13 +17,13 @@ The request to convert a design authorizes ticket preparation. Ask only about un
 
 Create one independently verifiable outcome per ticket, preferring useful vertical slices where feasible. A small design may need only one ticket. Capture shared contracts or prerequisites explicitly when they must precede other work. Avoid arbitrary ticket counts, token budgets, or file-by-file fragmentation.
 
-Use [the ticket template](assets/ticket.md). Every ticket must carry enough context for a worker without the chat history:
+Use [the ticket template](assets/ticket.md). Every ticket must be usable without the chat history, with access to its linked source files. Keep it a bounded work brief, not a second design:
 
-- Objective, expected behavior, scope, and exclusions.
-- Source design link and relevant section references; summarize the essential decisions locally.
-- Implementation guidance, affected areas verified in the repository, and required interfaces or contracts. Label proposed paths as proposed.
+- Ticket-specific objective, expected behavior, scope, and exclusions; link shared goals and constraints in the intent.
+- Exact source design sections; summarize only decisions essential to understanding this task locally. Do not copy shared architecture, API contracts, or the full Definition of Done.
+- Task-specific implementation guidance and affected areas verified in the repository; link authoritative interfaces or contracts. Label proposed paths as proposed.
 - Dependencies and blockers, with links to prerequisite tickets.
-- Observable acceptance criteria and appropriate validation scenarios or commands. Every implementation ticket must explicitly include a "Test-First" requirement: the worker must first provide evidence of a failing test before implementing the fix. Do not invent existing test commands.
+- Observable task-specific acceptance criteria mapped to source criteria, with validation scenarios or commands; link shared validation detail instead of duplicating it. Every implementation ticket must explicitly include a "Test-First" requirement: the worker must first provide evidence of a failing test before implementing the fix. Do not invent existing test commands.
 - Primary skill required: `software-engineering` for production changes, `debugging` for an existing failure, or `proof-of-concept` for a feasibility experiment covered by the request. The primary skill may use supporting debugging or bounded POC within ticket scope. Experiments report evidence and do not stand in for production delivery.
 
 Allow routine implementation choices within the design. If decomposition reveals a material design gap or contradiction, surface it to the user and update the source design only to reflect resolved decisions.

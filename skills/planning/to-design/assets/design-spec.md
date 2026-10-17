@@ -1,47 +1,25 @@
 # <Design name>
 
-Status: Draft / Ready for ticketing
+Intent: <relative link to authoritative intent>
+Status: Draft / Ready for ticketing (completeness, not user approval)
 
-## Problem and goals
+## Change Summary
 
-Describe the need, intended users, and observable success criteria.
+Write a short technical summary of the proposed change, affected boundaries, selected approach, and main risk or constraint. Do not repeat Goal or Why from intent.
 
-## Scope
+Link supporting files and exact contract/decision sections only when needed. For a small design, keep the necessary implementation detail in short, named subsections here: precise behavior, technical decisions and trade-offs, contracts, and important failure paths. Link unchanged project context. Label unverified assumptions; resolve consequential unknowns before declaring the design ready.
 
-List requirements with stable references where useful, and explicit exclusions.
+## Validation
 
-## Tech Stack
+Map source acceptance criteria to planned checks or link detailed validation scenarios. Include relevant negative paths. Label checks as planned, executed, blocked, or unverified; report actual results only when checks ran. Do not copy the Definition of Done or treat proposed tests as passing evidence.
 
-Specify the languages, frameworks, libraries, and infrastructure components chosen for this design. Provide rationale for any significant deviations from the existing project stack.
+## Risks and Mitigations
 
-## Use cases
+List material technical risks and mitigations, including compatibility, security, migration, or recovery concerns when affected. Link detailed handling rather than repeating it. If no material risk is identified, say so briefly.
 
-For each key use case, describe the actor, trigger, preconditions, successful outcome, and important alternate or failure flows.
+## Review Checklist
 
-## Architecture
+- [ ] <Consequential technical decision to review, linked to its detailed section>
+- [ ] <Unresolved question and implementation impact, only if one remains>
 
-Describe existing and proposed components, responsibilities, boundaries, and data flow. Include a Mermaid architecture diagram using the actual component names.
-
-## Interaction sequences
-
-Include Mermaid sequence diagrams for the key use cases. Explain important failure paths and resulting state.
-
-## API specification
-
-When applicable, specify operations, request/response shapes and examples, authentication/authorization, and errors. Reference authoritative existing contracts. Otherwise state why this section is inapplicable.
-
-## Additional design details
-
-Replace this section with relevant sections for UI behavior, data models, migrations, compatibility, performance, or other requirements. Omit irrelevant detail.
-
-## Validation and rollout
-
-Describe how the outcomes will be verified and any required migration, rollout, or rollback behavior.
-
-## Decisions and assumptions
-
-Record chosen approaches, rationale, and assumptions. Identify technical claims awaiting verification.
-
-## Open questions
-
-List unresolved questions and their implementation impact, or state that none remain. Readiness describes completeness, not user approval.
+Replace placeholders with relevant review points; omit inapplicable items. Do not repeat shared requirements or add generic approval checklists.

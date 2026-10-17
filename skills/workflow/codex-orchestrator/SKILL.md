@@ -25,7 +25,9 @@ Role references are portable Markdown instructions passed in dispatch prompts. T
 
 Read applicable project instructions, the authorized request/conversation, assigned tickets, relevant code, tests, and available intent/design/todo artifacts. Use explicit artifact paths when supplied. Current user decisions take precedence over stale artifacts; identify the discrepancy in the handoff. Do not invent documents or demand a complete document set when the authorized request already establishes the task. Missing material criteria block the affected comparison or decision, not unrelated checks.
 
-Build a compact assignment map: task/criterion IDs, source references, dependencies, worker ownership, validation coverage, and review domains. Preserve ticket IDs and give criteria stable IDs when needed. For an implementation workflow, assign every required acceptance criterion to a validator, including cross-layer flows. An integration owner must exercise the actual local cross-layer flow; independently mocked layer checks are not end-to-end evidence.
+For authorized implementation runs, read and apply [To-Todo](../../planning/to-todo/SKILL.md) directly: maintain `todo.md` as the primary execution checklist without a separate user invocation. The parent is its sole writer; workers report evidence and blockers. Follow the shared rules for initialization, transitions, completion, and ticket synchronization. Read-only review/validation runs do not mutate the checklist.
+
+Build a compact assignment map using the checklist's task/ticket IDs for implementation, or assignment IDs for read-only work: source references, dependencies, worker ownership, validation coverage, and review domains. Keep run-specific coverage/ownership in existing run records rather than a competing task queue. Give criteria stable IDs when needed. For an implementation workflow, assign every required acceptance criterion to a validator, including cross-layer flows. An integration owner must exercise the actual local cross-layer flow; independently mocked layer checks are not end-to-end evidence.
 
 Choose reviewers from the codebase's actual domain boundaries and affected behavior, such as frontend, API, storage, data pipelines, ML, or AI orchestration. Use multiple reviewers when distinct scopes warrant them; pass shared contracts to the responsible reviewers. Do not spawn a fixed specialist roster or expand ordinary review into an exhaustive security scan.
 
@@ -35,7 +37,7 @@ Defaults: at most two consolidated repair rounds after the initial checks; expli
 
 Include these task-specific adaptations explicitly in worker handoffs when applicable, so generic companion instructions do not create conflicting gates:
 
-- Available ticket/conversation grounding replaces the mandatory intent/design/todo reading sequence when those files do not exist and expectations are complete. Still read existing applicable artifacts and escalate material gaps.
+- When formal artifacts are absent, ground the assignment in the authorized ticket/conversation and available relevant sources. The parent maintains the execution checklist under the shared To-Todo rules; do not require workers to create missing intent/design/ticket documents. Escalate material gaps.
 - An already authorized implementation/bug-fix request covers a minimal in-scope repair. Require the debugging fix proposal and evidence, but do not repeat its Phase 4 approval request when existing user authorization covers the fix. Diagnosis-only authorization does not permit edits.
 - For a POC comparison, success requires results for all requested candidates/criteria, not just the first successful hypothesis. Specify isolated scratch and report destinations in the handoff; the authorized report destination replaces the companion's generic root `POC_FINAL_REPORT.md` location. Budget exhaustion still stops experiments.
 
@@ -59,7 +61,8 @@ Assignment ID / role / objective:
 Read role reference: <absolute path>
 Read companion skill: <absolute path>
 Workspace and applicable project instructions:
-Grounding: <ticket/conversation and available intent/design sections>
+Grounding: <ticket/conversation, available intent/design sections, exact detailed contracts>
+Checklist: <todo.md path and assigned task IDs for implementation; parent-only writes; otherwise not applicable>
 Assigned criteria or incidents: <IDs, expected outcomes, sources>
 Dependencies and prior handoff: <verified results, decisions, gaps>
 Authorized files, effects, and exclusions:
@@ -103,5 +106,7 @@ Each dispatch of a consolidated repair batch consumes one round, even if several
 Report acceptance separately from code review. Acceptance is PASS only when every required in-scope criterion has valid final-target evidence; FAIL when a confirmed criterion fails; otherwise INCOMPLETE. A review-only run reports review findings and limitations without claiming acceptance validation occurred.
 
 Overall implementation completion requires required acceptance checks to pass, required assignments/reports to be complete, and confirmed in-scope defects to be resolved or explicitly deferred by the user. Optional review suggestions do not block completion. State any deferrals, excluded scope, blocked/unverified checks, exhausted budgets, and unresolved IDs truthfully.
+
+Before the final implementation handoff, reconcile `todo.md` and relevant local ticket/index state under the shared To-Todo rules using final-target evidence, not worker completion claims. Include the checklist path and remaining items.
 
 Return a concise summary of delivered work, target, actual checks, review domains/findings, repair rounds used, evidence paths, and remaining actions. Stop or clean up only agents, processes, and disposable fixtures owned by this run and permitted by its authorization. Preserve user data and unrelated sessions.

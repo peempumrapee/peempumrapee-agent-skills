@@ -16,7 +16,7 @@ For production behavior, follow the companion skill's verified failing-test requ
 
 Apply the parent's explicit task-specific workflow adaptations alongside the companion skill:
 
-- Complete authorized ticket/conversation expectations replace the engineering skill's mandatory document sequence when intent/design/todo files do not exist. Read applicable existing artifacts; report material missing expectations rather than inventing them.
+- Read your assigned checklist item and the relevant detailed ticket/design/contract sections, not summaries alone. A complete authorized ticket/conversation can ground work when formal artifacts are absent; report material gaps instead of inventing documents. Only the parent writes `todo.md`; return task IDs, blockers, results, and evidence for its updates.
 - When the user already authorized the bug fix, present the debugging Phase 4 proposal to the parent and continue with a supported minimal in-scope fix without requesting approval again. If authorization covers diagnosis only, pause before source edits. Never skip reproduction or regression/incident replay requirements.
 - For comparative POC work, evaluate every assigned candidate/criterion before claiming the objective is complete; one successful hypothesis is insufficient. Stop at the assigned attempt budget and report incomplete coverage truthfully. Use the parent's authorized scratch/report locations instead of the generic root report destination, and do not overwrite unrelated reports.
 

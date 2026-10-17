@@ -31,14 +31,17 @@ These records are collected by the orchestrator during future runs, not by a glo
 ### Primary: Sequential Pipeline Mode (Default)
 Execute tasks in a strict chain. This is the default behavior for continuous workflows where Agent B depends on Agent A's decisions.
 
+For authorized implementation runs, apply [To-Todo](../../planning/to-todo/SKILL.md) directly before dispatch: maintain `todo.md` as the primary execution checklist, with the parent as sole writer. Follow the shared rules for transitions, blockers, evidence-based completion, and local ticket synchronization; no separate user invocation is needed. Read-only review/validation runs do not mutate the checklist.
+
 **The Sequential Workflow:**
-1. **Dispatch Agent A**: Spawn the first session.
+1. **Dispatch Agent A**: For implementation, mark its assigned checklist item in-progress; then spawn the first session.
 2. **Supervise**: Use the Supervision Loop (see below) to approve Agent A's plan.
 3. **Wait for Completion**: Monitor for a sentinel file (e.g., `.pi/msp/task-1.done`).
 4. **Synthesize Handoff**:
    - Read the logs of Agent A.
    - Extract **Key Decisions**, **Architectural Choices**, and **Unresolved Questions**.
    - Generate a concise "Handoff Summary."
+   - For implementation, reconcile its checklist item and relevant local ticket state under the shared To-Todo rules. A sentinel alone cannot complete the item; required validation/review may still be pending.
 5. **Dispatch Agent B**: Spawn the next session, injecting the Handoff Summary and original design-phase context into the prompt.
 
 ### Alternative: Parallel Mode
@@ -46,7 +49,7 @@ Spawn all approved sessions simultaneously. Use only for independent tasks when 
 
 ### Implementation–Validation Feedback Loop
 
-Use this workflow when the approved chain includes implementation and acceptance validation. Read [Validator](../validator/SKILL.md) before planning or dispatching validation. Resolve the skill path to an absolute path and require every validator worker to read it. Keep read-only `review` separate: review findings may support the handoff but cannot replace executed behavioral validation.
+Use this workflow when the approved chain includes implementation and acceptance validation. Read [Validator](../../reviewing/validator/SKILL.md) before planning or dispatching validation. Resolve the skill path to an absolute path and require every validator worker to read it. Keep read-only `review` separate: review findings may support the handoff but cannot replace executed behavioral validation.
 
 **Approved chain:** Implementation → freeze target → frontend/backend validation → gather feedback → targeted implementation repairs → freeze new target → revalidation.
 
@@ -54,7 +57,7 @@ Use this workflow when the approved chain includes implementation and acceptance
 
 Before the first dispatch, present the full chain, applicable validator roles, local environment, permitted side effects/cleanup, and repair budget. Default to **at most two repair rounds after the initial validation**, unless the user approves a different limit. Each dispatch of consolidated fixes consumes one round; new findings or replacement sessions do not reset the budget. Include a bounded timeout for each worker.
 
-Build a shared alignment matrix with stable criterion IDs and source references to intent, design, and ticket acceptance criteria. Assign every required criterion to a validator; record any non-applicable role explicitly rather than spawning unnecessary workers.
+Build a shared alignment matrix using stable checklist task/ticket IDs and criterion IDs with source references to intent, design, and ticket acceptance criteria. Keep run-specific criterion ownership in the run records, not another competing execution checklist. Assign every required criterion to a validator; record any non-applicable role explicitly rather than spawning unnecessary workers.
 
 | Role | Scope | Required runtime evidence |
 |------|-------|---------------------------|
@@ -108,7 +111,7 @@ Investigate conflicting frontend/backend results against the same target with a 
 
 #### 5. Dispatch targeted repairs, then revalidate
 
-If confirmed failures are within the approved implementation scope and budget remains, send the implementation worker the consolidated findings, original grounding material, affected regression paths, and remaining budget. Require the worker to read [Software Engineering](../software-engineering/SKILL.md), follow its test-first requirements for production behavior fixes, make minimal fixes, and return an ID-by-ID disposition with changed files and actual test results. Do not allow validators to fix the code or implementations to rewrite criteria solely to obtain PASS.
+If confirmed failures are within the approved implementation scope and budget remains, send the implementation worker the consolidated findings, original grounding material, affected regression paths, and remaining budget. Require the worker to read [Software Engineering](../../development/software-engineering/SKILL.md), follow its test-first requirements for production behavior fixes, make minimal fixes, and return an ID-by-ID disposition with changed files and actual test results. Do not allow validators to fix the code or implementations to rewrite criteria solely to obtain PASS.
 
 Serialize repairs in a shared workspace; parallel implementation requires separately approved independent ownership/workspaces. Wait for all repairs to finish before validating again. Freeze the new target, rebuild/restart affected local services safely, and dispatch validators again with the prior feedback and repair summary. Retest original failures, affected regression paths, and cross-layer contracts. Do not carry forward stale passes: every required criterion needs evidence applicable to the final target, rerunning checks where target/configuration/fixtures changed or applicability cannot be demonstrated.
 
@@ -118,7 +121,7 @@ Serialize repairs in a shared workspace; parallel implementation requires separa
 - **FAIL:** Confirmed failures remain when the repair budget is exhausted or repairs cannot proceed within scope. Return unresolved IDs and evidence; ask for authorization before another round or expanded work.
 - **INCOMPLETE:** Required criteria are BLOCKED/UNVERIFIED, evidence is conflicting/stale, or a worker failed without a conclusive result. Include any confirmed failures rather than hiding them.
 
-Stop on user cancellation or unsafe effects immediately. Do not silently respawn workers or extend the repair budget. Retain round reports, provide final per-criterion status and finding dispositions, and clean up only processes/fixtures owned by the workflow. Never claim implementation completion is validated merely because implementation tests pass.
+Stop on user cancellation or unsafe effects immediately. Do not silently respawn workers or extend the repair budget. Reconcile `todo.md` and relevant local ticket state with final-target evidence under the shared To-Todo rules, leaving blocked or unverified work unchecked. Retain round reports, provide final per-criterion status and finding dispositions, and clean up only processes/fixtures owned by the workflow. Never claim implementation completion is validated merely because implementation tests pass.
 
 ---
 
@@ -131,34 +134,34 @@ The Parent Agent must maintain a watchdog state for every active sub-agent:
    tmux capture-pane -t "$SESSION" -p | tail -n 15
    ```
    Only treat the pane as awaiting supervision when its output is **stable across consecutive polls** (e.g., 2–3 polls a few seconds apart) *and* contains a gate signal (`"Proceed?"`, `"Confirm?"`, a proposed `Plan:`, or `"USER INPUT REQUIRED"`). Do not race the model's streaming output — keystrokes sent mid-generation are lost or corrupt the turn.
-2. **Intercept Prompts**: If the captured pane contains `"Proceed?"`, `"Confirm?"`, a proposed `Plan:`, or `"USER INPUT REQUIRED"`, the Parent Agent intercepts. Every intercepted plan is reviewed **against the Grounding Material** (see Prompt Composition & Handoffs): the sub-agent's plan must map to the assigned ticket's objective and acceptance criteria and respect the constraints/anti-goals in `intent.md` — not merely look reasonable in isolation.
+2. **Intercept Prompts**: If the captured pane contains `"Proceed?"`, `"Confirm?"`, a proposed `Plan:`, or `"USER INPUT REQUIRED"`, the Parent Agent intercepts. Every intercepted plan is reviewed **against the Grounding Material** (see Prompt Composition & Handoffs): the sub-agent's plan must map to the assigned objective and acceptance criteria and respect applicable intent constraints/anti-goals, or explicit authorized user decisions when formal artifacts are absent — not merely look reasonable in isolation.
    - **TDD Enforcement**: For `software-engineering` tasks, the Parent Agent must verify that the plan starts with "Write a failing test for [behavior]." If it is missing, the Parent Agent must send a correction: *"Your plan is missing the Test-First step. Please start by writing and verifying a failing test for the intended behavior before implementing the change."*
    - **Validator Enforcement**: For `validator` tasks, confirm every assigned criterion maps to a comparison or concrete runtime assertion, the local-only safety gate precedes execution, and the report records the frozen target and actual evidence. Reject plans that repair code, probe unapproved remote environments, or substitute source inspection for behavioral validation.
-3. **Review & Respond** — every response sent to the sub-session must be grounded in the design-stage artifacts. Cite the specific source (file path + section, e.g. `docs/intent/pizza.md#Non-Goals` or the ticket's acceptance criterion) rather than giving an opinionated verdict:
-   - **Correct Plan**: Send approval **after confirming each ticket acceptance criterion maps to a plan step**. If grounded, keep it terse: `tmux send-keys -t "$SESSION" "y — plan covers all acceptance criteria [list them]. Proceed." Enter`.
-   - **Incorrect Plan**: Send a correction that **quotes the violated requirement from the design artifacts** — the intent constraint, the design decision, the acceptance criterion, or the anti-goal the plan breaches — then the required change: `tmux send-keys -t "$SESSION" "No — violates <source §ref>: <quoted requirement>. Instead do [X]." Enter`.
+3. **Review & Respond** — ground every response in applicable artifacts or explicit authorized user decisions. Cite the specific source (file path + section, criterion ID, or identified user decision) rather than giving an opinionated verdict:
+   - **Correct Plan**: Send approval **after confirming each assigned acceptance criterion maps to a plan step**. If grounded, keep it terse: `tmux send-keys -t "$SESSION" "y — plan covers all acceptance criteria [list them]. Proceed." Enter`.
+   - **Incorrect Plan**: Send a correction that **quotes the violated source requirement** — the intent constraint, design decision, acceptance criterion, anti-goal, or explicit authorized user decision — then the required change: `tmux send-keys -t "$SESSION" "No — violates <source §ref>: <quoted requirement>. Instead do [X]." Enter`.
    - **User Browser Input**: For `USER INPUT REQUIRED`, notify the user immediately with the worker's criterion, safe URL, exact browser tab/session, fields/actions to complete (such as entering a local test account email/password and clicking Sign in), and a request to reply “done”. Never ask for secrets in chat or auto-approve the login. Track the worker as awaiting user input, not hung/failed; suspend its execution-time watchdog while waiting without busy-polling, respawning, dispatching repairs, or consuming a repair round. Keep its browser/session available and do not let another worker interfere. After the user's confirmation, relay it to the worker and require browser-tool verification before resuming. If access is unavailable, the user cancels, or the flow is unsafe, preserve a BLOCKED/INCOMPLETE result. Manual input cannot authorize an unapproved remote authentication flow.
    - **Clarification**: Relay sub-agent questions to the user **together with the relevant design-stage context** (what the ticket/design says about the topic). Send the answer back citing its source: if it comes from an existing artifact, quote it; if it is a genuinely new user decision, mark it as such and note that it should be recorded (via `domain-modeling` / a decision ticket) so later agents inherit it instead of re-deriving it.
-   - **No grounding, no response**: if the relevant artifact is missing or the sub-agent's plan addresses a requirement not covered by any ticket/design, do not improvise — surface the gap to the user first.
+   - **No grounding, no response**: if no applicable artifact or explicit authorized user decision establishes a material requirement, do not improvise — surface the gap to the user first.
 
 ---
 
 ## Prompt Composition & Handoffs
 
 ### Design Phase Context
-When spawning any agent, always include relevant design-phase context (e.g., "Project Goal: X", "Constraints: Y", "Reference Specs: Z").
+When spawning any agent, include applicable intent constraints, assigned ticket/criteria, and exact relevant design sections/contracts. Summaries orient the worker but do not replace reading technical detail. For implementation, include the `todo.md` path and task ID, and state that only the parent edits the shared checklist; workers return evidence and blockers.
 
 ### Grounding Material (required before dispatch and before any supervision response)
-Before dispatching the first agent — and again before answering any gate, question, or plan — the Parent Agent must have the design-stage artifacts in context. These are the outputs of the engineering pipeline skills:
+Before dispatch and any supervision response, the parent must have the applicable source requirements and technical detail in context. Reuse loaded sources and refresh affected sections when decisions or scope change; do not reread the entire suite on every gate. These are the available outputs of the engineering pipeline skills:
 
 | Artifact | Source skill | Typical location | Used for |
 |---|---|---|---|
 | `intent.md` | `to-intent` | `docs/intent/` | Objective, rationale, constraints, anti-goals; the benchmark for plan approval |
-| Design suite | `to-design` | `docs/designs/<name>/` (spec, use cases, sequence/architecture diagrams, API contracts) | What the sub-agent's work must conform to |
+| Design suite | `to-design` | `docs/designs/<name>/overview.md` plus relevant optional detail | Technical decisions and exact contracts the sub-agent must follow |
 | Implementation tickets | `to-ticket` | Issue tracker / local tickets | Per-agent objectives, dependencies, acceptance criteria |
 | `todo.md` | `to-todo` | project root | Current checklist state the chain is executing |
 
-If these do not exist, do not improvise them: recommend running the corresponding skill (`to-intent` first) before orchestrating, or get the user's explicit go-ahead to proceed ungapped. When a design artifact is outdated relative to what the user says, treat the user's instruction as authoritative and note that the artifact needs updating.
+Missing formal artifacts do not justify inventing requirements or demanding a complete document suite when the authorized ticket/conversation establishes the task. Use explicit user decisions as grounding and let the parent initialize the execution checklist under To-Todo; missing consequential criteria block the affected task. When an artifact is outdated, current user instructions take precedence; identify the discrepancy in the handoff.
 
 ### Sentinel Obligation
 Instruct every sub-agent, as part of its injected prompt, to write a sentinel file (`.pi/msp/task-n.done`) upon completion. The parent sequence-gates on it; a sub-agent that never writes it is considered failed or hung. For feedback loops, use unique run/round/role paths, such as `.pi/msp/<run-id>/round-0/frontend.done`, so earlier completion cannot trigger a later round. Save the assigned report before writing the sentinel; include the worker outcome, target identity, and report path in it. FAIL/BLOCKED reports also signal completion. The parent must verify the report rather than treating sentinel existence as PASS.
@@ -166,7 +169,9 @@ Instruct every sub-agent, as part of its injected prompt, to write a sentinel fi
 ### Handoff Injection (Sequential Mode)
 For continuous tasks, the prompt for the next agent must follow this structure:
 ```text
-[Design Context]  <- intent.md constraints + relevant design-suite excerpts + the assigned ticket (objective, acceptance criteria)
+[Grounding]  <- applicable intent constraints + exact design/contract sections + assigned criteria or authorized user decisions
++
+[Implementation Checklist]  <- todo.md path + task ID; parent-only writes; omit for read-only assignments
 +
 [Handoff Summary from Previous Agent]:
 "The previous agent completed [Task A]. Key decisions made:
@@ -244,7 +249,7 @@ At the end of dispatch/pipeline setup, print:
 
 ## Safety Rules
 
-- **Grounded Supervision**: Never approve, correct, or answer a sub-agent without citing the design-stage artifact that justifies the response. If no artifact covers the situation, surface the gap to the user instead of improvising.
+- **Grounded Supervision**: Never approve, correct, or answer a sub-agent without citing the applicable source artifact or explicit authorized user decision. If neither covers a consequential requirement, surface the gap to the user instead of improvising.
 - **No Auto-Approval**: Always review plans via the Supervision Loop.
 - **Environment Integrity**: Always use absolute paths and login shells (`zsh -l`).
 - **Truthful Handoffs**: Do not hallucinate decisions or results; synthesize only what is supported by the sub-agent's logs, saved reports, and referenced artifacts. Distinguish reported claims from verified tool evidence.

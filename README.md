@@ -21,9 +21,9 @@ Pi and Codex discover skill files recursively, so skills may be grouped in these
 
 - `describe` — concise project overviews for codebase orientation and documentation
 - `to-intent` — interview-driven intent documents covering goals, constraints, and anti-goals
-- `to-design` — design specifications, diagrams, and API contracts
+- `to-design` — compact, summary-first technical designs with conditional Web Application, Data Platform & Pipeline, LLM Engineering, and Infrastructure guidance
 - `to-ticket` — dependency-aware implementation tickets with acceptance criteria
-- `to-todo` — actionable task tracking in `todo.md`
+- `to-todo` — shared `todo.md` execution-checklist rules; both orchestrators apply them directly, with the parent as sole writer
 
 ### Development — `skills/development/`
 
@@ -61,8 +61,8 @@ intent → design → planning → implementation → review → release
 | Stage | Skills to use | Main outputs | Ready to advance when |
 | --- | --- | --- | --- |
 | **Intent** — define what and why | `to-intent`; `describe` for codebase context | Intent document under `docs/intent/` with goals, constraints, non-goals, and success measures | Intent is documented and must-have requirement questions are resolved |
-| **Design** — define how it should work | `to-design` | Design suite under `docs/designs/<feature>/`, including architecture, interactions, and relevant API contracts | In-scope requirements are covered and critical design ambiguities are resolved |
-| **Planning** — create executable tasks | `to-ticket`, then `to-todo` | Dependency-ordered tickets under the project's ticket location, acceptance criteria, and `todo.md` | Requirements map to tickets, decision blockers are resolved, and the user approves the ticket set |
+| **Design** — define how it should work | `to-design` | Compact `docs/designs/<feature>/overview.md` linking intent; supporting contracts, diagrams, and validation only when needed | In-scope requirements are covered and critical design ambiguities are resolved |
+| **Planning** — create executable tasks | `to-ticket`; `to-todo` for checklist synchronization, also applied directly by orchestrators | Dependency-ordered tickets with acceptance criteria, linked from `todo.md` when execution is tracked | Requirements map to tickets, decision blockers are resolved, and the user approves the ticket set |
 | **Implementation** — build and validate | `software-engineering`; `validator` for acceptance checks; `debugging` for failures; `proof-of-concept` for bounded feasibility tests; explicitly invoke an orchestrator for supervised execution | Code, validation evidence, updated tickets/checklist, and design deviation notes | Tickets are complete or explicitly descoped, and required validation passes |
 | **Review** — verify against intent and design | `review` | Review verdict and evidence-backed findings | No unresolved critical findings remain |
 | **Release** — ship verified work | Follow the project's release checklist | Changelog, version/tag or published artifact, and release notes | The release checklist is complete and the artifact is published or tagged |

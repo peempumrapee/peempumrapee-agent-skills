@@ -53,8 +53,9 @@ execute.
   modes, security constraints.
 
 **Outputs.**
-- `docs/designs/<feature-name>/` containing the design doc, use cases,
-  architecture/sequence diagrams, and API contracts.
+- `docs/designs/<feature-name>/overview.md` linking intent, with technical change
+  summary, validation, risks, and review points. Supporting contracts, diagrams,
+  and other design detail are produced only when needed by the change.
 
 **Exit criteria.**
 - Design covers all non-goal-excluded requirements in `intent.md`.

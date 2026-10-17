@@ -1,6 +1,6 @@
 ---
 name: to-design
-description: Discuss requirements with the user and develop a design specification with use cases, architecture and sequence diagrams, and relevant API contracts. Use when turning requirements into a design or revising a design before implementation planning.
+description: Turn intent into a concise, reviewable technical design, selecting relevant domain guidance and supporting contracts or diagrams only when needed. Use when creating or revising a design before implementation planning.
 ---
 
 # To Design
@@ -24,18 +24,36 @@ Carry forward settled decisions and existing authorization without repeating app
 
 Collect relevant grill-me or grill-with-docs conclusions, glossary entries, ADRs, and resolved Wayfinder decisions. Link sources and preserve settled choices; reopen them only when new evidence exposes a conflict, explaining that conflict to the user. Carry unresolved questions into the spec and distinguish decision tickets from implementation work.
 
+## Select domain guidance
+
+Route by changed behavior and boundaries, not the project's label. Read only relevant references; combine them when needed or use none for a change without domain-specific concerns.
+
+| Reference | Read when the change affects |
+| --- | --- |
+| [Web Application](references/web-application.md) | User-facing behavior, web APIs, authentication, or frontend/backend contracts |
+| [Data Platform & Pipeline](references/data-platform-and-pipeline.md) | Data ingestion, transformation, storage ownership, orchestration, or data consumers |
+| [LLM Engineering](references/llm-engineering.md) | Model, prompt, retrieval, tool-use, or evaluation behavior |
+| [Infrastructure](references/infrastructure.md) | Environments, networking, identity, capacity, deployment, or recovery |
+
+Guides surface consequential questions and failure modes; they are not mandatory section lists or technology prescriptions. Prefer project-specific architecture and contracts. Select output files independently of references: do not create one document per domain. Before drafting, announce the chosen references and files in one sentence with the reason; this adds no approval gate. Expand the selection only when discovery reveals additional impact.
+
 ## Produce the spec
 
-Instead of a single monolithic document, decompose the design into a set of atomic artifacts stored in a dedicated directory. This ensures clarity and easier maintenance. Produce the following files as needed:
+Use **`overview.md`** as the compact human-review entry point, following [the overview template](assets/design-spec.md): link the intent, then provide **Change Summary**, **Validation**, **Risks and Mitigations**, and **Review Checklist**. Change Summary is a short opening paragraph about the technical delta and affected boundaries. Validation links source criteria and distinguishes planned checks from checks actually run. The checklist focuses on consequential technical decisions and unresolved questions, not generic approval boilerplate. A reader should understand what they are approving without opening every supporting file. For a small change, this may be the only design file; put necessary technical detail in short sections within it.
 
-- **`overview.md`**: Problem statement, goals, scope, exclusions, and high-level success criteria.
-- **`architecture.md`**: Proposed architecture, component responsibilities, chosen tech stack, and a Mermaid architecture or ER diagram.
-- **`interactions.md`**: Mermaid sequence diagrams, activity diagrams, and key behavioral flows (including failure paths).
-- **`deployment.md`**: (Produce only if deployment architecture is not yet documented in the project or if this feature introduces material changes to the infrastructure). Include deployment architecture, infrastructure requirements, environment configuration (dev/staging/prod), network flow, and a Mermaid deployment diagram.
-- **`api.md`**: Detailed API contracts, endpoints, inputs/outputs, auth, and error codes.
-- **`validation.md`**: Detailed success criteria, DoD (Definition of Done), and validation scenarios.
+Intent owns Goal/Why (objective/rationale), constraints, anti-goals, and Definition of Done. **Do not repeat or paraphrase** Goal or Why in design; link the authoritative intent instead. Design owns technical decisions, their trade-offs, and contracts; tickets own bounded work and task-specific acceptance checks. Link exact source sections rather than copying shared requirements.
 
-Scale detail to the requirement. For a genuinely inapplicable diagram or section, state why in the `overview.md` rather than fabricating components. Keep diagrams, API examples, and prose consistent across files. Use stable identifiers so tickets can cite specific files and sections. Distinguish accepted choices from proposed alternatives.
+Add atomic supporting files only when implementation or review needs the detail:
+
+- **`architecture.md`**: Changed component boundaries, responsibilities, dependencies, data ownership, or consequential technology decisions. Use an architecture or ER diagram only when useful; link unchanged project architecture.
+- **`interactions.md`**: Consequential ordering, retries, async processing, state transitions, or cross-component flows, including failure paths. Interactions may be backend-only; omit unaffected frontend behavior. Use sequence or activity diagrams only when they clarify behavior.
+- **`deployment.md`**: Changed infrastructure, environment configuration, rollout, migration, or recovery behavior. Link unchanged environment and network documentation.
+- **`api.md`**: New or changed external contracts, including inputs/outputs, auth, and errors. Link unchanged contracts.
+- **`validation.md`**: Intent-criterion mappings and concrete validation scenarios too substantial for the overview, including relevant negative paths. Do not restate the Definition of Done.
+
+Every supporting file starts with a short technical summary: what changes, the selected approach, and its main risk or constraint. Follow with concise, change-focused sections, bullets, tables, or examples. Link shared risks and validation rather than repeating the overview checklist. Omit inapplicable files and sections without placeholder explanations. Use no hard whole-file word limit: preserve exact contracts, expected behavior, important failure/state transitions, compatibility/security/migration constraints, and testable validation. Resolve consequential unknowns or mark affected work blocked; brevity must not force an implementer to guess.
+
+Keep diagrams, examples, and prose consistent. Use stable section references so tickets can cite the authoritative detail. Distinguish accepted choices from proposed alternatives.
 
 ## Save and hand off
 
@@ -43,4 +61,4 @@ Honor a user-specified destination or existing project design convention; otherw
 
 In Plan Mode, keep the draft in the conversation and report its intended destination; write files only when the active mode permits. If asked for an in-chat output only, honor that choice.
 
-Before handing off, check requirement coverage, diagram consistency, and unresolved decisions. Return the spec link and any blockers. The user can request `$to-ticket` to turn the design into work. This skill creates design artifacts; it does not start implementation, dispatch workers, or publish to a tracker. Existing domain-modeling, research, and prototype workflows may support a concrete need, but are not prerequisites.
+Before handing off, check requirement coverage, diagram consistency, links, and unresolved decisions. Verify that the overview and opening summaries make the technical changes and material risks understandable, and that the detailed sections support implementation without guessing. Return the overview link, relevant detailed section/contract links, and any blockers. Coding agents must read their task's relevant detail and linked contracts; summaries alone are not implementation instructions. The user can request `$to-ticket` to turn the design into work. This skill creates design artifacts; it does not start implementation, dispatch workers, or publish to a tracker. Existing domain-modeling, research, and prototype workflows may support a concrete need, but are not prerequisites.

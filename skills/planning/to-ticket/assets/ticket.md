@@ -10,23 +10,23 @@ Dependencies: <linked prerequisite tickets, or none>
 
 ## Objective and expected behavior
 
-Describe the outcome and summarize the design decisions needed to implement it without the conversation history.
+State this ticket's outcome. Link exact design sections and summarize only decisions needed to understand this task locally; linked files supply the remaining context, not the conversation history.
 
 ## Scope and exclusions
 
-Define this ticket's boundary and what belongs to other tickets.
+Define this ticket's boundary and what belongs to other tickets. Link shared intent constraints and anti-goals rather than copying them.
 
 ## Implementation guidance
 
-Identify relevant existing components, required interfaces/contracts, and constraints. Distinguish verified paths from proposed additions. Leave routine coding choices to the worker.
+Identify affected existing components and task-specific constraints; link authoritative interfaces/contracts rather than reproducing them. Distinguish verified paths from proposed additions. Leave routine coding choices to the worker.
 
 ## Acceptance criteria
 
-- [ ] <Observable outcome, with a concrete scenario where useful>
+- [ ] <Task-specific observable outcome, source criterion reference, and concrete scenario where useful>
 
 ## Validation
 
-Specify appropriate checks, including relevant failure scenarios. Include verified commands when available; otherwise describe the required verification without inventing commands.
+Specify task-specific checks and relevant failure scenarios; link shared validation detail. Include verified commands when available; otherwise describe verification without inventing commands. For implementation tickets, require Test-First evidence of a meaningful failing test before implementation.
 
 ## Blockers
 
